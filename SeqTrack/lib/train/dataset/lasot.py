@@ -44,6 +44,14 @@ class Lasot(BaseVideoDataset):
 
         self.sequence_list = self._build_sequence_list(vid_ids, split)
 
+        target_classes = ['book','coin']
+
+        # Filter the sequence_list to keep only sequences from the target classes
+        print("Original number of sequences:", len(self.sequence_list))
+        filtered_list = [seq for seq in self.sequence_list if seq.split('-')[0] in target_classes]
+        self.sequence_list = filtered_list
+        print("Number of sequences after filtering for {}: {}".format(target_classes, len(self.sequence_list)))
+
         if data_fraction is not None:
             self.sequence_list = random.sample(self.sequence_list, int(len(self.sequence_list)*data_fraction))
 
@@ -138,7 +146,9 @@ class Lasot(BaseVideoDataset):
         return self.image_loader(self._get_frame_path(seq_path, frame_id))
 
     def _get_class(self, seq_path):
-        raw_class = seq_path.split('/')[-2]
+        # print("🧩 DEBUG seq_path:", seq_path)  # 👈 Add this line
+        # raw_class = seq_path.split('/')[-2]
+        raw_class = os.path.basename(os.path.dirname(seq_path))
         return raw_class
 
     def get_class_name(self, seq_id):

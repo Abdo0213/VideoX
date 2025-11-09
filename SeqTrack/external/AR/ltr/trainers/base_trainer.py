@@ -150,7 +150,7 @@ class BaseTrainer:
             if checkpoint_list:
                 checkpoint_path = checkpoint_list[-1]
             else:
-                print('No matching checkpoint file found')
+                # print('No matching checkpoint file found')
                 return
         elif isinstance(checkpoint, int):
             # Checkpoint is the epoch number

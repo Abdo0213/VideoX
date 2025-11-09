@@ -53,7 +53,7 @@ class BaseTrainer:
 
             if self.settings.local_rank in [-1, 0]:
                 if not os.path.exists(self._checkpoint_dir):
-                    print("Training with multiple GPUs. checkpoints directory doesn't exist. "
+                    print("Training with GPU(s). checkpoints directory doesn't exist. "
                           "Create checkpoints directory")
                     os.makedirs(self._checkpoint_dir)
         else:
@@ -89,14 +89,14 @@ class BaseTrainer:
                             self.lr_scheduler.step()
                         else:
                             self.lr_scheduler.step(epoch - 1)
-                    # only save the last 10 checkpoints
-                    save_every_epoch = getattr(self.settings, "save_every_epoch", False)
-                    # save every 10 epochs
-                    # save_every_epoch = True
-                    if epoch > (max_epochs - 10) or save_every_epoch or epoch % 10 == 0:
-                        if self._checkpoint_dir:
-                            if self.settings.local_rank in [-1, 0]:
-                                self.save_checkpoint()
+                    
+                    # ---- START: MODIFICATION FOR ASSIGNMENT ----
+                    # Save a checkpoint at the end of every epoch as required.
+                    if self._checkpoint_dir:
+                        if self.settings.local_rank in [-1, 0]:
+                            self.save_checkpoint()
+                    # ---- END: MODIFICATION FOR ASSIGNMENT ----
+                            
             except:
                 print('Training crashed at epoch {}'.format(epoch))
                 if fail_safe:
@@ -132,20 +132,20 @@ class BaseTrainer:
             'settings': self.settings
         }
 
-        directory = '{}/{}'.format(self._checkpoint_dir, self.settings.project_path)
-        print(directory)
-        if not os.path.exists(directory):
-            print("directory doesn't exist. creating...")
-            os.makedirs(directory)
-
-        # First save as a tmp file
-        tmp_file_path = '{}/{}_ep{:04d}.tmp'.format(directory, net_type, self.epoch)
-        torch.save(state, tmp_file_path)
-
-        file_path = '{}/{}_ep{:04d}.pth.tar'.format(directory, net_type, self.epoch)
-
-        # Now rename to actual checkpoint. os.rename seems to be atomic if files are on same filesystem. Not 100% sure
-        os.rename(tmp_file_path, file_path)
+        # directory = '{}/{}'.format(self._checkpoint_dir, self.settings.project_path)
+        # if not os.path.exists(directory):
+        #     print("directory doesn't exist. creating...")
+        #     os.makedirs(directory)
+        #
+        # # First save as a tmp file
+        # tmp_file_path = '{}/{}_ep{:04d}.tmp'.format(directory, net_type, self.epoch)
+        # torch.save(state, tmp_file_path)
+        #
+        # file_path = '{}/{}_ep{:04d}.pth.tar'.format(directory, net_type, self.epoch)
+        #
+        # # Now rename to actual checkpoint. os.rename seems to be atomic if files are on same filesystem. Not 100% sure
+        # os.rename(tmp_file_path, file_path)
+        # print(f"Checkpoint saved locally at: {file_path}")
 
     def load_checkpoint(self, checkpoint = None, fields = None, ignore_fields = None, load_constructor = False):
         """Loads a network checkpoint file.
@@ -171,7 +171,7 @@ class BaseTrainer:
             if checkpoint_list:
                 checkpoint_path = checkpoint_list[-1]
             else:
-                print('No matching checkpoint file found')
+                # print('No matching checkpoint file found')
                 return
         elif isinstance(checkpoint, int):
             # Checkpoint is the epoch number

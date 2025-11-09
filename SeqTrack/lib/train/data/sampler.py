@@ -177,10 +177,17 @@ class TrackingSampler(torch.utils.data.Dataset):
                 # check whether data is valid
                 valid = data['valid']
             except:
+                print("Exception")
                 valid = False
 
             count_valid += 1
             if count_valid > 200:
+                print("too large count_valid")
+                print(str(count_valid))
+                print("Current dataset:", dataset.get_name())
+                print("Sequence ID:", seq_id)
+                print("Visible frames:", visible.sum().item(), "Total frames:", len(visible))
+                print("Sampling mode:", self.frame_sample_mode)
                 print("too large count_valid")
                 print(str(count_valid))
         return data
